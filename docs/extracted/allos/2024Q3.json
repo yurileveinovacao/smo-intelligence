@@ -1,0 +1,23 @@
+{
+  "grupo": "allos",
+  "ano": 2024,
+  "trimestre": 3,
+  "arquivo_origem": "allos\\ALLOS\\2024\\Relatório de Resultados\\Relatório de Resultados 3T24.pdf",
+  "data_extracao": "2026-03-06",
+  "nivel_grupo": {
+    "receita_bruta": null,
+    "noi": 563.535,
+    "noi_margem": null,
+    "ebitda_ajustado": 475.459,
+    "ffo": 307.197,
+    "taxa_ocupacao": 96.4,
+    "inadimplencia_liquida": -0.5,
+    "sss": 10.5,
+    "ssr": 4.2,
+    "vendas_totais": null,
+    "abl_propria_m2": null,
+    "receita_locacao": null
+  },
+  "nivel_shopping": [],
+  "notas": "Allos (fusao brMalls + Ancar jan/2023). Dados consolidados do portfolio."
+}

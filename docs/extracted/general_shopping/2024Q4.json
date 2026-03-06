@@ -1,0 +1,23 @@
+{
+  "grupo": "general_shopping",
+  "ano": 2024,
+  "trimestre": 4,
+  "arquivo_origem": "generals\\GENERALS\\2024\\Release\\GSB Release 4T24 final.pdf",
+  "data_extracao": "2026-03-06",
+  "nivel_grupo": {
+    "receita_bruta": 204.3,
+    "noi": null,
+    "noi_margem": 67.2,
+    "ebitda_ajustado": 70.7,
+    "ffo": 121.46,
+    "taxa_ocupacao": 95.4,
+    "inadimplencia_liquida": null,
+    "sss": null,
+    "ssr": null,
+    "vendas_totais": null,
+    "abl_propria_m2": null,
+    "receita_locacao": null
+  },
+  "nivel_shopping": [],
+  "notas": "General Shopping & Outlets. Dados consolidados."
+}

@@ -1,0 +1,23 @@
+{
+  "grupo": "multiplan",
+  "ano": 2024,
+  "trimestre": 4,
+  "arquivo_origem": "multiplan\\MULTIPLAN\\2024\\Relatório de resultados\\Relatório de Resultados 4T24.pdf",
+  "data_extracao": "2026-03-06",
+  "nivel_grupo": {
+    "receita_bruta": 2023.0,
+    "noi": 544.2,
+    "noi_margem": 91.5,
+    "ebitda_ajustado": 666.459,
+    "ffo": 632.563,
+    "taxa_ocupacao": 95.8,
+    "inadimplencia_liquida": 12.4,
+    "sss": 9.5,
+    "ssr": 5.3,
+    "vendas_totais": null,
+    "abl_propria_m2": 100.0,
+    "receita_locacao": 542.066
+  },
+  "nivel_shopping": [],
+  "notas": "Multiplan publica dados consolidados no release. Dados individuais por shopping disponiveis no Suplemento Operacional (planilha de fundamentos)."
+}

@@ -1,0 +1,23 @@
+{
+  "grupo": "iguatemi",
+  "ano": 2025,
+  "trimestre": 2,
+  "arquivo_origem": "iguatemi\\IGUATEMI\\2025\\Relatório de resultados\\Release 2T25_Final.pdf",
+  "data_extracao": "2026-03-06",
+  "nivel_grupo": {
+    "receita_bruta": 458.878,
+    "noi": null,
+    "noi_margem": 93.8,
+    "ebitda_ajustado": 109.4,
+    "ffo": 241.02,
+    "taxa_ocupacao": 96.4,
+    "inadimplencia_liquida": 0.3,
+    "sss": 12.1,
+    "ssr": 10.4,
+    "vendas_totais": null,
+    "abl_propria_m2": null,
+    "receita_locacao": null
+  },
+  "nivel_shopping": [],
+  "notas": "Iguatemi nao publica dados individuais por shopping no release. Dados consolidados do grupo."
+}

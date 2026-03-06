@@ -1,0 +1,45 @@
+# Ambiente
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+
+# Virtual env
+.venv/
+venv/
+
+# Releases (dados coletados — nao versionar)
+releases/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# Documentos dos concorrentes (PDFs, DOCX, XLSX — pesados, nao versionar)
+# Manter apenas os JSONs extraidos e markdowns
+docs/allos/
+docs/iguatemi/
+docs/multiplan/
+docs/general_shopping/
+docs/generals/
+!docs/extracted/
+
+# Arquivo NUL (artefato Windows)
+NUL

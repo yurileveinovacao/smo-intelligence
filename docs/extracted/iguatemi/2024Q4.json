@@ -1,0 +1,23 @@
+{
+  "grupo": "iguatemi",
+  "ano": 2024,
+  "trimestre": 4,
+  "arquivo_origem": "iguatemi\\IGUATEMI\\2024\\Relatório de resultados\\Release 4T24 PT vFinal.pdf",
+  "data_extracao": "2026-03-06",
+  "nivel_grupo": {
+    "receita_bruta": 429.973,
+    "noi": 95.2,
+    "noi_margem": 95.2,
+    "ebitda_ajustado": 84.0,
+    "ffo": null,
+    "taxa_ocupacao": 97.7,
+    "inadimplencia_liquida": -1.1,
+    "sss": 9.5,
+    "ssr": 8.3,
+    "vendas_totais": null,
+    "abl_propria_m2": null,
+    "receita_locacao": null
+  },
+  "nivel_shopping": [],
+  "notas": "Iguatemi nao publica dados individuais por shopping no release. Dados consolidados do grupo."
+}

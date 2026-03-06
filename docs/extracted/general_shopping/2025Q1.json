@@ -1,0 +1,23 @@
+{
+  "grupo": "general_shopping",
+  "ano": 2025,
+  "trimestre": 1,
+  "arquivo_origem": "generals\\GENERALS\\2025\\Release\\GSB Release 1T25 Final.pdf",
+  "data_extracao": "2026-03-06",
+  "nivel_grupo": {
+    "receita_bruta": 49.5,
+    "noi": null,
+    "noi_margem": 70.0,
+    "ebitda_ajustado": 78.2,
+    "ffo": 84.756,
+    "taxa_ocupacao": 95.7,
+    "inadimplencia_liquida": null,
+    "sss": null,
+    "ssr": null,
+    "vendas_totais": null,
+    "abl_propria_m2": null,
+    "receita_locacao": null
+  },
+  "nivel_shopping": [],
+  "notas": "General Shopping & Outlets. Dados consolidados."
+}

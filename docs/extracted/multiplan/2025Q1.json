@@ -1,0 +1,23 @@
+{
+  "grupo": "multiplan",
+  "ano": 2025,
+  "trimestre": 1,
+  "arquivo_origem": "multiplan\\MULTIPLAN\\2025\\Relatório de resultados\\Relatório de Resultados 1T25.pdf",
+  "data_extracao": "2026-03-06",
+  "nivel_grupo": {
+    "receita_bruta": 571.091,
+    "noi": 465.433,
+    "noi_margem": 94.2,
+    "ebitda_ajustado": 400.615,
+    "ffo": 277.477,
+    "taxa_ocupacao": 99.9,
+    "inadimplencia_liquida": 0.8,
+    "sss": 15.8,
+    "ssr": 7.0,
+    "vendas_totais": null,
+    "abl_propria_m2": 100.0,
+    "receita_locacao": 409.181
+  },
+  "nivel_shopping": [],
+  "notas": "Multiplan publica dados consolidados no release. Dados individuais por shopping disponiveis no Suplemento Operacional (planilha de fundamentos)."
+}

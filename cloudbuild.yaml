@@ -1,0 +1,64 @@
+# cloudbuild.yaml — Deploy automatico via Cloud Build
+# Disparado a cada push na branch main do repositorio smo-intelligence
+
+steps:
+  # 1. Build da imagem Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE_NAME}:latest'
+      - '.'
+    id: 'build'
+
+  # 2. Push para Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE_NAME}'
+    id: 'push'
+    waitFor: ['build']
+
+  # 3. Deploy no Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--no-allow-unauthenticated'
+      - '--service-account=${_SERVICE_ACCOUNT}'
+      - '--add-cloudsql-instances=${_SQL_CONNECTION}'
+      - '--set-secrets=DATABASE_URL=smo-intelligence-db-url:latest'
+      - '--set-env-vars=ENVIRONMENT=production'
+      - '--memory=512Mi'
+      - '--cpu=1'
+      - '--min-instances=0'
+      - '--max-instances=3'
+      - '--timeout=300'
+      - '--vpc-connector=${_VPC_CONNECTOR}'
+      - '--vpc-egress=private-ranges-only'
+    id: 'deploy'
+    waitFor: ['push']
+
+# Substituicoes padrao (podem ser sobrescritas no trigger)
+substitutions:
+  _REGION: southamerica-east1
+  _AR_REPO: smo-docker
+  _SERVICE_NAME: smo-intelligence
+  _SERVICE_ACCOUNT: smo-ia@appspot.gserviceaccount.com
+  _SQL_CONNECTION: smo-ia:southamerica-east1:smo-db-1
+  _VPC_CONNECTOR: smo-serverless-connector
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE_NAME}:latest'
