@@ -6,7 +6,6 @@ Create Date: 2026-03-08 17:00:00.000000
 """
 
 from alembic import op
-import sqlalchemy as sa
 from sqlalchemy import text
 
 # revision identifiers, used by Alembic.
@@ -19,10 +18,13 @@ SCHEMA = "competitive_intel"
 
 
 def upgrade() -> None:
-    # Schema ja criado no env.py (CREATE SCHEMA IF NOT EXISTS)
-
-    # Enums via SQL raw com IF NOT EXISTS (idempotente)
+    # ---------------------------------------------------------------
+    # 100% raw SQL para evitar bugs do sa.Enum + create_type=False
+    # no PostgreSQL dialect do SQLAlchemy 2.0
+    # ---------------------------------------------------------------
     conn = op.get_bind()
+
+    # Enums (idempotente via DO/EXCEPTION)
     conn.execute(text(
         f"DO $$ BEGIN "
         f"CREATE TYPE {SCHEMA}.tipo_shopping AS ENUM "
@@ -43,100 +45,82 @@ def upgrade() -> None:
     ))
 
     # Tabela grupos
-    op.create_table(
-        "grupos",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("nome", sa.String(120), nullable=False),
-        sa.Column("ticker", sa.String(10), nullable=True),
-        sa.Column("url_ri", sa.String(300), nullable=True),
-        sa.Column("capital_aberto", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("ativo", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("observacoes", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        schema=SCHEMA,
-    )
-
-    # Tipos enum referenciados com create_type=False (ja criados acima)
-    tipo_shopping_col = sa.Enum(
-        "shopping", "outlet", "strip_mall", "outro",
-        name="tipo_shopping", schema=SCHEMA, create_type=False,
-    )
-    segmento_publico_col = sa.Enum(
-        "premium", "medio_alto", "medio", "popular", "outlet_premium",
-        name="segmento_publico", schema=SCHEMA, create_type=False,
-    )
-    nivel_dado_col = sa.Enum(
-        "individual", "grupo", "estimativa",
-        name="nivel_dado", schema=SCHEMA, create_type=False,
-    )
+    conn.execute(text(f"""
+        CREATE TABLE IF NOT EXISTS {SCHEMA}.grupos (
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(120) NOT NULL,
+            ticker VARCHAR(10),
+            url_ri VARCHAR(300),
+            capital_aberto BOOLEAN NOT NULL DEFAULT true,
+            ativo BOOLEAN NOT NULL DEFAULT true,
+            observacoes TEXT,
+            created_at TIMESTAMPTZ DEFAULT now(),
+            updated_at TIMESTAMPTZ DEFAULT now()
+        )
+    """))
 
     # Tabela shoppings
-    op.create_table(
-        "shoppings",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("grupo_id", sa.Integer(), sa.ForeignKey(f"{SCHEMA}.grupos.id"), nullable=False),
-        sa.Column("nome", sa.String(200), nullable=False),
-        sa.Column("nome_abreviado", sa.String(60), nullable=True),
-        sa.Column("cidade", sa.String(100), nullable=True),
-        sa.Column("uf", sa.String(2), nullable=True),
-        sa.Column("tipo", tipo_shopping_col, nullable=True),
-        sa.Column("segmento_publico", segmento_publico_col, nullable=True),
-        sa.Column("abl_m2", sa.Float(), nullable=True),
-        sa.Column("concorrente_direto", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-        sa.Column("dados_individuais_ri", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-        sa.Column("observacoes", sa.Text(), nullable=True),
-        sa.Column("ativo", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        schema=SCHEMA,
-    )
+    conn.execute(text(f"""
+        CREATE TABLE IF NOT EXISTS {SCHEMA}.shoppings (
+            id SERIAL PRIMARY KEY,
+            grupo_id INTEGER NOT NULL REFERENCES {SCHEMA}.grupos(id),
+            nome VARCHAR(200) NOT NULL,
+            nome_abreviado VARCHAR(60),
+            cidade VARCHAR(100),
+            uf VARCHAR(2),
+            tipo {SCHEMA}.tipo_shopping,
+            segmento_publico {SCHEMA}.segmento_publico,
+            abl_m2 DOUBLE PRECISION,
+            concorrente_direto BOOLEAN NOT NULL DEFAULT false,
+            dados_individuais_ri BOOLEAN NOT NULL DEFAULT false,
+            observacoes TEXT,
+            ativo BOOLEAN NOT NULL DEFAULT true,
+            created_at TIMESTAMPTZ DEFAULT now(),
+            updated_at TIMESTAMPTZ DEFAULT now()
+        )
+    """))
 
     # Tabela resultados_trimestrais
-    op.create_table(
-        "resultados_trimestrais",
-        sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("shopping_id", sa.Integer(), sa.ForeignKey(f"{SCHEMA}.shoppings.id"), nullable=False),
-        sa.Column("ano", sa.SmallInteger(), nullable=False),
-        sa.Column("trimestre", sa.SmallInteger(), nullable=False),
-        # Metricas operacionais
-        sa.Column("vendas_totais", sa.Float(), nullable=True),
-        sa.Column("vendas_m2", sa.Float(), nullable=True),
-        sa.Column("sss", sa.Float(), nullable=True),
-        sa.Column("ssr", sa.Float(), nullable=True),
-        sa.Column("taxa_ocupacao", sa.Float(), nullable=True),
-        sa.Column("abl_propria_m2", sa.Float(), nullable=True),
-        sa.Column("fluxo_visitantes", sa.Float(), nullable=True),
-        sa.Column("inadimplencia_liquida", sa.Float(), nullable=True),
-        # Metricas financeiras
-        sa.Column("receita_bruta", sa.Float(), nullable=True),
-        sa.Column("receita_locacao", sa.Float(), nullable=True),
-        sa.Column("noi", sa.Float(), nullable=True),
-        sa.Column("noi_m2", sa.Float(), nullable=True),
-        sa.Column("noi_margem", sa.Float(), nullable=True),
-        sa.Column("ebitda_ajustado", sa.Float(), nullable=True),
-        sa.Column("ebitda_margem", sa.Float(), nullable=True),
-        sa.Column("ffo", sa.Float(), nullable=True),
-        # Metadados
-        sa.Column("nivel_dado", nivel_dado_col, nullable=True),
-        sa.Column("fonte", sa.String(200), nullable=True),
-        sa.Column("url_fonte", sa.String(500), nullable=True),
-        sa.Column("nome_arquivo_fonte", sa.String(300), nullable=True),
-        sa.Column("notas", sa.Text(), nullable=True),
-        sa.Column("revisado", sa.Boolean(), nullable=False, server_default=sa.text("false")),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.UniqueConstraint("shopping_id", "ano", "trimestre", name="uq_shopping_ano_tri"),
-        schema=SCHEMA,
-    )
+    conn.execute(text(f"""
+        CREATE TABLE IF NOT EXISTS {SCHEMA}.resultados_trimestrais (
+            id SERIAL PRIMARY KEY,
+            shopping_id INTEGER NOT NULL REFERENCES {SCHEMA}.shoppings(id),
+            ano SMALLINT NOT NULL,
+            trimestre SMALLINT NOT NULL,
+            vendas_totais DOUBLE PRECISION,
+            vendas_m2 DOUBLE PRECISION,
+            sss DOUBLE PRECISION,
+            ssr DOUBLE PRECISION,
+            taxa_ocupacao DOUBLE PRECISION,
+            abl_propria_m2 DOUBLE PRECISION,
+            fluxo_visitantes DOUBLE PRECISION,
+            inadimplencia_liquida DOUBLE PRECISION,
+            receita_bruta DOUBLE PRECISION,
+            receita_locacao DOUBLE PRECISION,
+            noi DOUBLE PRECISION,
+            noi_m2 DOUBLE PRECISION,
+            noi_margem DOUBLE PRECISION,
+            ebitda_ajustado DOUBLE PRECISION,
+            ebitda_margem DOUBLE PRECISION,
+            ffo DOUBLE PRECISION,
+            nivel_dado {SCHEMA}.nivel_dado,
+            fonte VARCHAR(200),
+            url_fonte VARCHAR(500),
+            nome_arquivo_fonte VARCHAR(300),
+            notas TEXT,
+            revisado BOOLEAN NOT NULL DEFAULT false,
+            created_at TIMESTAMPTZ DEFAULT now(),
+            updated_at TIMESTAMPTZ DEFAULT now(),
+            CONSTRAINT uq_shopping_ano_tri UNIQUE (shopping_id, ano, trimestre)
+        )
+    """))
 
 
 def downgrade() -> None:
-    op.drop_table("resultados_trimestrais", schema=SCHEMA)
-    op.drop_table("shoppings", schema=SCHEMA)
-    op.drop_table("grupos", schema=SCHEMA)
-
     conn = op.get_bind()
+    conn.execute(text(f"DROP TABLE IF EXISTS {SCHEMA}.resultados_trimestrais"))
+    conn.execute(text(f"DROP TABLE IF EXISTS {SCHEMA}.shoppings"))
+    conn.execute(text(f"DROP TABLE IF EXISTS {SCHEMA}.grupos"))
     conn.execute(text(f"DROP TYPE IF EXISTS {SCHEMA}.nivel_dado"))
     conn.execute(text(f"DROP TYPE IF EXISTS {SCHEMA}.segmento_publico"))
     conn.execute(text(f"DROP TYPE IF EXISTS {SCHEMA}.tipo_shopping"))
