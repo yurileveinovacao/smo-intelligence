@@ -9,8 +9,11 @@ __pycache__
 .mypy_cache
 .venv
 venv
-docs/
-!docs/extracted/
+docs/allos/
+docs/iguatemi/
+docs/multiplan/
+docs/general_shopping/
+docs/generals/
 *.md
 !requirements.txt
 .dockerignore
