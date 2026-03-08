@@ -7,6 +7,7 @@ Create Date: 2026-03-08 17:00:00.000000
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import text
 
 # revision identifiers, used by Alembic.
 revision = "001_initial"
@@ -20,24 +21,26 @@ SCHEMA = "competitive_intel"
 def upgrade() -> None:
     # Schema ja criado no env.py (CREATE SCHEMA IF NOT EXISTS)
 
-    # Enums
-    tipo_shopping_enum = sa.Enum(
-        "shopping", "outlet", "strip_mall", "outro",
-        name="tipo_shopping", schema=SCHEMA,
-    )
-    tipo_shopping_enum.create(op.get_bind(), checkfirst=True)
-
-    segmento_publico_enum = sa.Enum(
-        "premium", "medio_alto", "medio", "popular", "outlet_premium",
-        name="segmento_publico", schema=SCHEMA,
-    )
-    segmento_publico_enum.create(op.get_bind(), checkfirst=True)
-
-    nivel_dado_enum = sa.Enum(
-        "individual", "grupo", "estimativa",
-        name="nivel_dado", schema=SCHEMA,
-    )
-    nivel_dado_enum.create(op.get_bind(), checkfirst=True)
+    # Enums via SQL raw com IF NOT EXISTS (idempotente)
+    conn = op.get_bind()
+    conn.execute(text(
+        f"DO $$ BEGIN "
+        f"CREATE TYPE {SCHEMA}.tipo_shopping AS ENUM "
+        f"('shopping','outlet','strip_mall','outro'); "
+        f"EXCEPTION WHEN duplicate_object THEN null; END $$"
+    ))
+    conn.execute(text(
+        f"DO $$ BEGIN "
+        f"CREATE TYPE {SCHEMA}.segmento_publico AS ENUM "
+        f"('premium','medio_alto','medio','popular','outlet_premium'); "
+        f"EXCEPTION WHEN duplicate_object THEN null; END $$"
+    ))
+    conn.execute(text(
+        f"DO $$ BEGIN "
+        f"CREATE TYPE {SCHEMA}.nivel_dado AS ENUM "
+        f"('individual','grupo','estimativa'); "
+        f"EXCEPTION WHEN duplicate_object THEN null; END $$"
+    ))
 
     # Tabela grupos
     op.create_table(
@@ -54,6 +57,20 @@ def upgrade() -> None:
         schema=SCHEMA,
     )
 
+    # Tipos enum referenciados com create_type=False (ja criados acima)
+    tipo_shopping_col = sa.Enum(
+        "shopping", "outlet", "strip_mall", "outro",
+        name="tipo_shopping", schema=SCHEMA, create_type=False,
+    )
+    segmento_publico_col = sa.Enum(
+        "premium", "medio_alto", "medio", "popular", "outlet_premium",
+        name="segmento_publico", schema=SCHEMA, create_type=False,
+    )
+    nivel_dado_col = sa.Enum(
+        "individual", "grupo", "estimativa",
+        name="nivel_dado", schema=SCHEMA, create_type=False,
+    )
+
     # Tabela shoppings
     op.create_table(
         "shoppings",
@@ -63,8 +80,8 @@ def upgrade() -> None:
         sa.Column("nome_abreviado", sa.String(60), nullable=True),
         sa.Column("cidade", sa.String(100), nullable=True),
         sa.Column("uf", sa.String(2), nullable=True),
-        sa.Column("tipo", tipo_shopping_enum, nullable=True),
-        sa.Column("segmento_publico", segmento_publico_enum, nullable=True),
+        sa.Column("tipo", tipo_shopping_col, nullable=True),
+        sa.Column("segmento_publico", segmento_publico_col, nullable=True),
         sa.Column("abl_m2", sa.Float(), nullable=True),
         sa.Column("concorrente_direto", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("dados_individuais_ri", sa.Boolean(), nullable=False, server_default=sa.text("false")),
@@ -101,7 +118,7 @@ def upgrade() -> None:
         sa.Column("ebitda_margem", sa.Float(), nullable=True),
         sa.Column("ffo", sa.Float(), nullable=True),
         # Metadados
-        sa.Column("nivel_dado", nivel_dado_enum, nullable=True),
+        sa.Column("nivel_dado", nivel_dado_col, nullable=True),
         sa.Column("fonte", sa.String(200), nullable=True),
         sa.Column("url_fonte", sa.String(500), nullable=True),
         sa.Column("nome_arquivo_fonte", sa.String(300), nullable=True),
@@ -119,6 +136,7 @@ def downgrade() -> None:
     op.drop_table("shoppings", schema=SCHEMA)
     op.drop_table("grupos", schema=SCHEMA)
 
-    sa.Enum(name="nivel_dado", schema=SCHEMA).drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name="segmento_publico", schema=SCHEMA).drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name="tipo_shopping", schema=SCHEMA).drop(op.get_bind(), checkfirst=True)
+    conn = op.get_bind()
+    conn.execute(text(f"DROP TYPE IF EXISTS {SCHEMA}.nivel_dado"))
+    conn.execute(text(f"DROP TYPE IF EXISTS {SCHEMA}.segmento_publico"))
+    conn.execute(text(f"DROP TYPE IF EXISTS {SCHEMA}.tipo_shopping"))
