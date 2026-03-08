@@ -42,6 +42,7 @@ steps:
       - '--min-instances=0'
       - '--max-instances=3'
       - '--timeout=300'
+      - '--startup-cpu-boost'
       - '--vpc-connector=${_VPC_CONNECTOR}'
       - '--vpc-egress=private-ranges-only'
     id: 'deploy'

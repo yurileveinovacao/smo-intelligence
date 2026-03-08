@@ -12,7 +12,7 @@ from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import AsyncSessionLocal, engine
+from app.database import _get_session_factory
 from app.models.grupo import Grupo
 from app.models.resultado import NivelDado, ResultadoTrimestral
 from app.models.shopping import Shopping, SegmentoPublico, TipoShopping
@@ -258,7 +258,7 @@ async def _seed_resultados(
 # Funcao principal de seed
 # ---------------------------------------------------------------------------
 async def seed():
-    async with AsyncSessionLocal() as session:
+    async with _get_session_factory()() as session:
         session: AsyncSession
 
         # Cria schema se nao existir
