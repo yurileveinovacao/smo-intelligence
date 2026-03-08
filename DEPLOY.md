@@ -1,8 +1,8 @@
 # Deploy — SMO Intelligence
 
 ## URLs de Producao
-- **API:** `https://smo-intelligence-XXXX-rj.a.run.app` *(atualizar apos primeiro deploy)*
-- **Swagger:** `https://smo-intelligence-XXXX-rj.a.run.app/docs`
+- **API:** `https://smo-intelligence-rutww5ppqq-rj.a.run.app`
+- **Swagger:** `https://smo-intelligence-rutww5ppqq-rj.a.run.app/docs`
 - **Painel Admin SMO:** https://admin.santamariaoutlet.com.br
 
 ## Recursos GCP (projeto smo-ia)
