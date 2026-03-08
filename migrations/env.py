@@ -3,7 +3,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import pool, text
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.config import settings
 from app.database import Base
@@ -12,7 +12,11 @@ from app.database import Base
 import app.models  # noqa: F401
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.effective_database_url)
+# Escapa % para %% pois configparser interpreta % como interpolacao
+config.set_main_option(
+    "sqlalchemy.url",
+    settings.effective_database_url.replace("%", "%%"),
+)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -49,9 +53,10 @@ def do_run_migrations(connection) -> None:
 
 
 async def run_async_migrations() -> None:
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    # Usa create_async_engine direto com a URL das settings
+    # (evita configparser que interpreta % como interpolacao)
+    connectable = create_async_engine(
+        settings.effective_database_url,
         poolclass=pool.NullPool,
     )
 
