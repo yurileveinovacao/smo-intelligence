@@ -40,6 +40,39 @@ class ResultadoRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ResultadoDetalhado(BaseModel):
+    """Resultado com informações do shopping e grupo (para dashboard)."""
+    id: int
+    shopping_id: int
+    shopping_nome: str
+    grupo_nome: str
+    abl_m2: float | None = None
+    ano: int
+    trimestre: int
+
+    vendas_totais: float | None = None
+    vendas_m2: float | None = None
+    sss: float | None = None
+    ssr: float | None = None
+    taxa_ocupacao: float | None = None
+    abl_propria_m2: float | None = None
+    fluxo_visitantes: float | None = None
+    inadimplencia_liquida: float | None = None
+
+    receita_bruta: float | None = None
+    receita_locacao: float | None = None
+    noi: float | None = None
+    noi_m2: float | None = None
+    noi_margem: float | None = None
+    ebitda_ajustado: float | None = None
+    ebitda_margem: float | None = None
+    ffo: float | None = None
+
+    nivel_dado: str | None = None
+    fonte: str | None = None
+    revisado: bool = False
+
+
 class ResultadoComparativo(BaseModel):
     shopping_id: int
     shopping_nome: str
