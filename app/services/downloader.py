@@ -101,6 +101,14 @@ class ReleaseDownloader:
             header = f.read(8)
         return header.startswith(MAGIC_PDF) or header.startswith(MAGIC_ZIP)
 
+    def _headers_para_url(self, url: str) -> dict:
+        """Retorna headers apropriados para a URL.
+        URLs da API MZ Group (mziq.com) não precisam de headers de browser.
+        """
+        if "mziq.com" in url:
+            return {"Accept": "application/pdf,application/octet-stream,*/*"}
+        return HEADERS
+
     def baixar(self, release: dict, forcar: bool = False) -> dict:
         """Baixa um único release. Retorna dict com status."""
         grupo = release.get("grupo", "desconhecido")
@@ -119,6 +127,8 @@ class ReleaseDownloader:
                 self.manifesto.registrar(release, str(dest_path), "ja_existe", None, None, None)
                 return {"status": "ja_existe", "caminho": str(dest_path)}
 
+        headers = self._headers_para_url(url)
+
         # Download com retry e backoff exponencial
         last_error = None
         for tentativa in range(settings.HTTP_RETRY):
@@ -126,9 +136,10 @@ class ReleaseDownloader:
                 logger.info(f"Baixando ({tentativa + 1}/{settings.HTTP_RETRY}): {url}")
                 resp = requests.get(
                     url,
-                    headers=HEADERS,
+                    headers=headers,
                     timeout=settings.HTTP_TIMEOUT,
                     stream=True,
+                    allow_redirects=True,
                 )
                 resp.raise_for_status()
 
@@ -141,6 +152,7 @@ class ReleaseDownloader:
                             f.write(chunk)
                     logger.warning(f"Recebeu HTML ao invés de PDF: {url}")
                     self.manifesto.registrar(release, str(erro_path), "invalido", None, None, "content-type HTML")
+                    # Não retentar — HTML significa URL errada, não erro temporário
                     return {"status": "invalido", "caminho": str(erro_path), "erro": "content-type HTML"}
 
                 # Salva o arquivo
