@@ -37,7 +37,7 @@ steps:
       - '--add-cloudsql-instances=${_SQL_CONNECTION}'
       - '--set-secrets=DATABASE_URL=smo-intelligence-db-url:latest'
       - '--set-env-vars=ENVIRONMENT=production'
-      - '--memory=512Mi'
+      - '--memory=1Gi'
       - '--cpu=1'
       - '--min-instances=0'
       - '--max-instances=3'
